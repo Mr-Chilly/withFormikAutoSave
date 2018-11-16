@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import isEqual from "lodash.isequal";
 import { connect } from "formik";
 
 export default function withFormikAutoSave(config) {
@@ -7,18 +8,18 @@ export default function withFormikAutoSave(config) {
     class ComponentWithAutoSave extends Component {
       shouldComponentUpdate(nextProps) {
         const { values } = this.props;
-        if (nextProps.values !== values) {
+        if (!isEqual(nextProps.values, values)) {
           this.setState({ isAutoSaving: true, autoSaveError: undefined });
 
           config
-            .onSave(values, this.props)
+            .onSave(nextProps.values, this.props)
             .then(() =>
-              this.setState(() => ({
+              this.setState({
                 isAutoSaving: false,
                 lastAutoSaved: new Date()
-              }))
+              })
             )
-            .catch(err => this.setState(() => ({ autoSaveError: err })));
+            .catch(err => this.setState({ autoSaveError: err }));
           return true;
         }
         return false;
@@ -29,8 +30,7 @@ export default function withFormikAutoSave(config) {
       }
     }
     ComponentWithAutoSave.propTypes = {
-      values: PropTypes.object,
-      onSave: PropTypes.func
+      values: PropTypes.object
     };
 
     return connect(ComponentWithAutoSave);

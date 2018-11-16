@@ -5,6 +5,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var React = require('react');
 var React__default = _interopDefault(React);
 var PropTypes = _interopDefault(require('prop-types'));
+var isEqual = _interopDefault(require('lodash.isequal'));
 var formik = require('formik');
 
 function _classCallCheck(instance, Constructor) {
@@ -114,23 +115,19 @@ function withFormikAutoSave(config) {
 
           var values = this.props.values;
 
-          if (nextProps.values !== values) {
+          if (!isEqual(nextProps.values, values)) {
             this.setState({
               isAutoSaving: true,
               autoSaveError: undefined
             });
-            config.onSave(values, this.props).then(function () {
-              return _this.setState(function () {
-                return {
-                  isAutoSaving: false,
-                  lastAutoSaved: new Date()
-                };
+            config.onSave(nextProps.values, this.props).then(function () {
+              return _this.setState({
+                isAutoSaving: false,
+                lastAutoSaved: new Date()
               });
             }).catch(function (err) {
-              return _this.setState(function () {
-                return {
-                  autoSaveError: err
-                };
+              return _this.setState({
+                autoSaveError: err
               });
             });
             return true;
@@ -149,8 +146,7 @@ function withFormikAutoSave(config) {
     }(React.Component);
 
     ComponentWithAutoSave.propTypes = {
-      values: PropTypes.object,
-      onSave: PropTypes.func
+      values: PropTypes.object
     };
     return formik.connect(ComponentWithAutoSave);
   };
